@@ -3,13 +3,14 @@ dataset_name=deepsearch # or math_torl_offical to use torl training data
 train_data=$(pwd)/data/${dataset_name}/hard_search_1k.parquet
 val_data=[$(pwd)/data/${dataset_name}/gaia_test.parquet,\
 $(pwd)/data/${dataset_name}/hle_test.parquet]
-model_name=Qwen/Qwen3-4B
+model_name=stabilityai/stablelm-zephyr-3b
+lora_rank=32
 rl_alg=grpo # gae(ppo) or grpo, if grpo, then better set n>1 otherwise the group norm can not be effective
-n_gpus_per_node=8
+n_gpus_per_node=1
 n_nodes=1
-n=16
-batch_size=128
-ppo_mini_batch_size=32
+n=5
+batch_size=1
+ppo_mini_batch_size=1
 max_prompt_length=2048
 max_response_length=8192
 max_action_length=2048
@@ -27,14 +28,14 @@ kl_loss_type=low_var_kl
 lr=1e-6
 reward_manager=deepsearch
 ppo_micro_batch_size_per_gpu=1
-log_prob_micro_batch_size_per_gpu=8
+log_prob_micro_batch_size_per_gpu=1
 tensor_model_parallel_size=1
 gpu_memory_utilization=0.6 # higher gpu_memory_utilization will likely cause the vllm to OOM and get stuck, so set it to a lower value like 0.4 or 0.5
 do_offload=True # control actor's fsdp.[param|optimizer]_offload and actor_rollout_ref.rollout.fsdp.[param|optimizer]_offload; if gpu_memory_utilization is set to > 0.6, then do_offload should be set to True otherwise it will cause OOM
 use_dynamic_bsz=True # faster
 ulysses_sequence_parallel_size=1 # set to 1 for normal verl behavior, otherwise it will cause OOM
 fsdp_size=-1
-additional_eos_token_ids=[151645] # <|im_end|> token id
+additional_eos_token_ids=[0] # <|endoftext|> token id
 mask_observations=True # mask observations for kl loss and gradient descent
 enable_mtrl=False # enable multi-turn training
 model_pretty_name=$(echo $model_name | tr '/' '_' | tr '[:upper:]' '[:lower:]')
@@ -47,7 +48,7 @@ fi
 export VERL_RUN_ID=$run_name
 export NCCL_DEBUG=INFO
 export VLLM_USE_V1=1
-rollout_mode='async'
+rollout_mode='sync'
 
 # temp file for action tokens as verl cannot pass special strs as params
 action_stop_tokens_file="$(pwd)$(mktemp)"
@@ -68,7 +69,7 @@ PYTHONUNBUFFERED=1 python3 -m verl_tool.trainer.main_ppo \
     data.train_files=$train_data \
     data.val_files=$val_data \
     data.train_batch_size=$batch_size \
-    data.val_batch_size=1024 \
+    data.val_batch_size=1 \
     data.max_prompt_length=$max_prompt_length \
     data.max_response_length=$max_response_length \
     data.truncation='right' \
@@ -76,6 +77,7 @@ PYTHONUNBUFFERED=1 python3 -m verl_tool.trainer.main_ppo \
     reward_model.launch_reward_fn_async=True \
     actor_rollout_ref.model.path=$model_name \
     actor_rollout_ref.model.enable_gradient_checkpointing=True \
+    actor_rollout_ref.model.lora_rank=$lora_rank \
     actor_rollout_ref.actor.optim.lr=$lr \
     actor_rollout_ref.actor.optim.lr_warmup_steps=10 \
     actor_rollout_ref.model.use_remove_padding=True \
@@ -137,9 +139,9 @@ PYTHONUNBUFFERED=1 python3 -m verl_tool.trainer.main_ppo \
     trainer.n_gpus_per_node=$n_gpus_per_node \
     trainer.nnodes=$n_nodes \
     +trainer.remove_previous_ckpt_in_save=True \
-    trainer.save_freq=10 \
-    trainer.test_freq=10 \
-    trainer.total_epochs=10
+    trainer.save_freq=1 \
+    trainer.test_freq=1 \
+    trainer.total_epochs=2
 
 
 pkill -P -9 $server_pid
