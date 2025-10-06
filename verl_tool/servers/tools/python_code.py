@@ -10,7 +10,9 @@ import subprocess
 import os
 import uuid
 import shutil
-import resource
+import sys
+if sys.platform != "win32":
+    import resource
 from typing import Tuple, Dict, Any, Optional, Union, List
 
 # Timeout for code execution in seconds
@@ -236,16 +238,29 @@ def execute_python(code: Union[str, List[str]], timeout: int=TIMEOUT, stdin: Opt
 
     has_error = False
     try:
-        result = subprocess.run(
-            command,
-            input=stdin if stdin else None,
-            env=env,
-            text=True,
-            capture_output=True,
-            preexec_fn=set_limits,
-            timeout=timeout,
-            cwd=subprocess_cwd,
-        )
+        if sys.platform == "win32":
+            # Windows 不支持 preexec_fn
+            result = subprocess.run(
+                command,
+                input=stdin if stdin else None,
+                env=env,
+                text=True,
+                capture_output=True,
+                timeout=timeout,
+                cwd=subprocess_cwd,
+            )
+        else:
+            # Unix/Linux 才使用 preexec_fn
+            result = subprocess.run(
+                command,
+                input=stdin if stdin else None,
+                env=env,
+                text=True,
+                capture_output=True,
+                preexec_fn=set_limits,
+                timeout=timeout,
+                cwd=subprocess_cwd,
+            )
         # Clean both stdout and stderr
         stdout = clean_traceback(result.stdout, cwd)
         stderr = clean_traceback(result.stderr, cwd)
