@@ -2,7 +2,7 @@ set -x
 dataset_name=deepsearch # or math_torl_offical to use torl training data
 train_data=$(pwd)/data/${dataset_name}/hard_search_1.parquet
 val_data=[$(pwd)/data/${dataset_name}/hard_search_1.parquet]
-model_name=stabilityai/stablelm-zephyr-3b
+model_name=Qwen/Qwen2-1.5B-Instruct
 lora_rank=32
 rl_alg=grpo # gae(ppo) or grpo, if grpo, then better set n>1 otherwise the group norm can not be effective
 n_gpus_per_node=1
@@ -34,7 +34,7 @@ do_offload=True # control actor's fsdp.[param|optimizer]_offload and actor_rollo
 use_dynamic_bsz=True # faster
 ulysses_sequence_parallel_size=1 # set to 1 for normal verl behavior, otherwise it will cause OOM
 fsdp_size=-1
-additional_eos_token_ids=[0] # <|endoftext|> token id
+additional_eos_token_ids=[151645] # <|im_end|> token id
 mask_observations=True # mask observations for kl loss and gradient descent
 enable_mtrl=False # enable multi-turn training
 model_pretty_name=$(echo $model_name | tr '/' '_' | tr '[:upper:]' '[:lower:]')
