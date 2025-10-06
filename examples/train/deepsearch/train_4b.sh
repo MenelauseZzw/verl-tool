@@ -46,7 +46,7 @@ else
 fi
 export VERL_RUN_ID=$run_name
 export NCCL_DEBUG=INFO
-export VLLM_USE_V1=1
+export VLLM_USE_V1=0
 rollout_mode='sync'
 
 # temp file for action tokens as verl cannot pass special strs as params
