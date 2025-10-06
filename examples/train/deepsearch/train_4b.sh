@@ -1,8 +1,7 @@
 set -x
 dataset_name=deepsearch # or math_torl_offical to use torl training data
-train_data=$(pwd)/data/${dataset_name}/hard_search_1k.parquet
-val_data=[$(pwd)/data/${dataset_name}/gaia_test.parquet,\
-$(pwd)/data/${dataset_name}/hle_test.parquet]
+train_data=$(pwd)/data/${dataset_name}/hard_search_1.parquet
+val_data=[$(pwd)/data/${dataset_name}/hard_search_1.parquet]
 model_name=stabilityai/stablelm-zephyr-3b
 lora_rank=32
 rl_alg=grpo # gae(ppo) or grpo, if grpo, then better set n>1 otherwise the group norm can not be effective
