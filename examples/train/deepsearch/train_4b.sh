@@ -140,7 +140,7 @@ PYTHONUNBUFFERED=1 python3 -m verl_tool.trainer.main_ppo \
     +trainer.remove_previous_ckpt_in_save=True \
     trainer.save_freq=1 \
     trainer.test_freq=1 \
-    trainer.total_epochs=2
+    trainer.total_epochs=2 2>&1 | tee debug_outputs.log
 
 
 pkill -P -9 $server_pid
