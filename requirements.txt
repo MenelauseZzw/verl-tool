@@ -1,3 +1,4 @@
+hf-transfer==0.1.9
 accelerate==1.6.0
 acecoder @ git+https://github.com/TIGER-AI-Lab/AceCoder.git@ad017bcef56a95e5b06dc8da564c8a8ab6e3d62e
 aiohappyeyeballs==2.6.1
