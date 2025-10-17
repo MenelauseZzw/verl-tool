@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 def test_google_search(
     url: str = "http://localhost:5000/get_observation",
-    query: str = "Python machine learning tutorials"
+    query: str = "Search for 'Winnie the Pooh illustrator' on Wikipedia. "
 ):
     """Test Google search functionality with a simple query"""
     
