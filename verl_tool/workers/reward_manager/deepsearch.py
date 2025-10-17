@@ -43,18 +43,6 @@ class PixelReasonerRewardManager(ToRLRewardManager):
         self.add_format_penalty = True # -0.5 if the response does not start with <think> and end with </think>
 
     def add_additional_penalties(self, response: str, data_i, scores_i: dict):
-        # 1.4 format penalty
-        if self.add_format_penalty:
-            # check if <think> exists in the response
-            #  and if \\boxed{} exists in the response
-            think_match = re.search(r"<think>(.*?)</think>", response, re.DOTALL)
-            answer_match = re.search(r"\\boxed\{.*?\}", response)
-            if not think_match or not answer_match:
-                scores_i['score'] = -1
-                scores_i['format_penalty'] = 1
-            else:
-                scores_i['format_penalty'] = 0
-        
         scores_i['score'] = scores_i['accuracy']
         
         if "turns_stats" in data_i.non_tensor_batch:
@@ -65,5 +53,16 @@ class PixelReasonerRewardManager(ToRLRewardManager):
                     scores_i['tool_call_reward'] = 1
                 else:
                     scores_i['tool_call_reward'] = 0
+
+        if self.add_format_penalty:
+            # check if <think> exists in the response
+            # and if \\boxed{} exists in the response
+            think_match = re.search(r"<think>(.*?)</think>", response, re.DOTALL)
+            answer_match = re.search(r"\\boxed\{.*?\}", response)
+            if not think_match or not answer_match:
+                scores_i['score'] -= 0.5
+                scores_i['format_penalty'] = 1
+            else:
+                scores_i['format_penalty'] = 0
         
         return scores_i
