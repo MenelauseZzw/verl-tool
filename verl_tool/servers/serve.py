@@ -553,7 +553,7 @@ class AsyncToolServer:
                 }
             }
     
-    def _prepare_extra_fields(self, request_data: ActionRequest) -> List[Dict[str, Any]]:
+    def  _prepare_extra_fields(self, request_data: ActionRequest) -> List[Dict[str, Any]]:
         """Prepare and validate extra fields from request"""
         if request_data.extra_fields:
             extra_fields = request_data.extra_fields
